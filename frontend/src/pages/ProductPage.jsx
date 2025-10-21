@@ -51,7 +51,7 @@ export default function ProductPage() {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5001/products/${id}`
+          `http://localhost:5001/api/products/${id}`
         );
         setProduct(data);
       } catch (error) {
@@ -69,8 +69,8 @@ export default function ProductPage() {
     try {
       setLoadingReview(true);
       const endpoint = editingReviewId
-        ? `http://localhost:5001/products/${product._id}/reviews/${editingReviewId}`
-        : `http://localhost:5001/products/${product._id}/reviews`;
+        ? `http://localhost:5001/api/products/${product._id}/reviews/${editingReviewId}`
+        : `http://localhost:5001/api/products/${product._id}/reviews`;
 
       const method = editingReviewId ? "patch" : "post";
       await axios[method](
@@ -104,7 +104,7 @@ export default function ProductPage() {
     if (!window.confirm("Delete this review?")) return;
     try {
       await axios.delete(
-        `http://localhost:5001/products/${product._id}/reviews/${reviewId}`,
+        `http://localhost:5001/api/products/${product._id}/reviews/${reviewId}`,
         { headers: { Authorization: `Bearer ${userInfo?.token}` } }
       );
       alert("Review deleted!");
