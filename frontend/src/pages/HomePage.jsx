@@ -60,7 +60,7 @@ export default function HomePage() {
         return;
       }
       try {
-        const { data } = await axios.get("http://localhost:5001/api/products");
+        const { data } = await axios.get("http://localhost:5001/products");
         const filtered = data
           .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
           .slice(0, 5);

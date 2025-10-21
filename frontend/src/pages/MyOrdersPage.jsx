@@ -26,7 +26,7 @@ export default function MyOrdersPage() {
         };
 
         const { data } = await axios.get(
-          "http://localhost:5001/api/orders/myorders",
+          "http://localhost:5001/orders/myorders",
           config
         );
 
