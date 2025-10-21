@@ -74,14 +74,13 @@ export const getOrderById = asyncHandler(async (req, res) => {
 });
 
 // Update order to paid
+// payOrder controller
 export const payOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
     res.status(404);
     throw new Error("Order not found");
   }
-
-  const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
   const session = await stripe.checkout.sessions.create({
     ui_mode: "embedded",
@@ -95,10 +94,8 @@ export const payOrder = asyncHandler(async (req, res) => {
       },
       quantity: item.qty,
     })),
-    return_url: `${FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    return_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
   });
 
   res.json({ clientSecret: session.client_secret });
 });
-
-  
