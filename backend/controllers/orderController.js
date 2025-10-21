@@ -88,6 +88,7 @@ export const payOrder = asyncHandler(async (req, res) => {
     throw new Error("Stripe is not configured on the server");
   }
 
+  const frontendUrl = process.env.FRONTEND_URL || req.headers.origin || "";
   const session = await stripe.checkout.sessions.create({
     ui_mode: "embedded",
     payment_method_types: ["card"],
@@ -100,7 +101,7 @@ export const payOrder = asyncHandler(async (req, res) => {
       },
       quantity: item.qty,
     })),
-    return_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    return_url: `${frontendUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
   });
 
   res.json({ clientSecret: session.client_secret });
