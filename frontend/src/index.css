@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-gradient {
+    animation: gradient 5s ease infinite;
+  }
+  
+  @keyframes pulse-slow {
+    0%, 100% { box-shadow: 0 0 10px rgba(99,102,241,0.4); }
+    50% { box-shadow: 0 0 25px rgba(99,102,241,0.7); }
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
