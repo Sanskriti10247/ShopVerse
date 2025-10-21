@@ -75,29 +75,30 @@ export const getOrderById = asyncHandler(async (req, res) => {
 
 // Update order to paid
 export const payOrder = asyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-      res.status(404);
-      throw new Error("Order not found");
-    }
-  
-    const session = await stripe.checkout.sessions.create({
-      ui_mode: "embedded", // NEW 🔥
-      payment_method_types: ["card"],
-      mode: "payment",
-      line_items: order.orderItems.map((item) => ({
-        price_data: {
-          currency: "usd",
-          product_data: { name: item.name, images: [item.image] },
+  const order = await Order.findById(req.params.id);
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
 
-          unit_amount: Math.round(item.price * 100),
-        },
-        quantity: item.qty,
-      })),
-      return_url: "http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}",
+  const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-    });
-  
-    res.json({ clientSecret: session.client_secret });
+  const session = await stripe.checkout.sessions.create({
+    ui_mode: "embedded",
+    payment_method_types: ["card"],
+    mode: "payment",
+    line_items: order.orderItems.map((item) => ({
+      price_data: {
+        currency: "usd",
+        product_data: { name: item.name, images: [item.image] },
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.qty,
+    })),
+    return_url: `${FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
   });
+
+  res.json({ clientSecret: session.client_secret });
+});
+
   
