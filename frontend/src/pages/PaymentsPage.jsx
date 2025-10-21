@@ -25,10 +25,11 @@ export default function PaymentsPage() {
           },
         };
 
-        const { data } = await axios.get(
-          "http://localhost:5001/api/payments/my",
-          config
-        );
+        const API_BASE =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
+      
+      const { data } = await axios.get(`${API_BASE}/payments/my`, config);
+      
         setPayments(data);
       } catch (err) {
         console.error("Error fetching payments:", err);
