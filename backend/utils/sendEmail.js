@@ -1,36 +1,56 @@
 import nodemailer from "nodemailer";
 
-const sendEmail = async (options) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
+// Helper function to create a test account
+const getTestAccount = () => {
+  return new Promise((resolve, reject) => {
+    nodemailer.createTestAccount((err, account) => {
+      if (err) {
+        console.error("Failed to create a test account: " + err.message);
+        reject(err);
+      } else {
+        console.log("✅ Ethereal Test Account created");
+        resolve(account);
+      }
+    });
   });
+};
 
-  const mailOptions = {
-    from: `"ShopVerse" <${process.env.EMAIL_USER}>`,
-    to: options.to,
-    subject: options.subject,
-    html: options.html,
-  };
-
+const sendEmail = async (options) => {
   try {
-    await transporter.verify();
-    console.log("✅ SMTP connection successful");
+    const testAccount = await getTestAccount();
+
+    const transporter = nodemailer.createTransport({
+      host: testAccount.smtp.host,
+      port: testAccount.smtp.port,
+      secure: testAccount.smtp.secure,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    const mailOptions = {
+      from: `"ShopVerse Test" <test@shopverse.com>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+    };
+
     const info = await transporter.sendMail(mailOptions);
-    console.log("📤 Email sent:", info.response);
+
+    console.log("✅ Email sent (caught by Ethereal): %s", info.messageId);
+    
+    // ** THE IMPORTANT CHANGE **
+    // Return the URL instead of just logging it
+    return nodemailer.getTestMessageUrl(info);
+
   } catch (error) {
-    console.error("❌ Email error:", error);
-    throw new Error(error.message); // This correctly stops the process if email fails
+    console.error("❌ Ethereal Email error:", error);
+    throw new Error(error.message);
   }
-  
-  // DELETE THE EXTRA CALL THAT WAS HERE
-  // await transporter.sendMail(mailOptions); 
 };
 
 export default sendEmail;

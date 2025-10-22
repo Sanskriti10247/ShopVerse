@@ -67,6 +67,31 @@ export default function CartPage() {
       });
 
       const { data } = await api.post(`/orders/${order._id}/pay`);
+
+      // ** START OF NEW CODE **
+
+      // 1. Check if we got an emailUrl back
+      if (data.emailUrl) {
+        // 2. Show a "toast" pop-up with a clickable link
+        // The autoClose: false makes it stay until the user clicks it.
+        toast.info(
+          <span>
+            <b>Test Email Sent!</b>
+            <br />
+            <a 
+              href={data.emailUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-500 underline"
+            >
+              Click here to view the confirmation email.
+            </a>
+          </span>,
+          { autoClose: false, closeOnClick: true }
+        );
+      }
+
+      // 3. Set the client secret to show the payment form
       setClientSecret(data.clientSecret);
     } catch (err) {
       console.error(err);
