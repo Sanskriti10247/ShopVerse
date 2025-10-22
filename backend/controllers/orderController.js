@@ -7,7 +7,8 @@ import sendEmail from "../utils/sendEmail.js";
 import User from "../models/userModel.js";
 
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripeSecret = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 
 // Creating a new order
 export const addOrderItems = asyncHandler(async (req, res) => {
@@ -82,6 +83,12 @@ export const payOrder = asyncHandler(async (req, res) => {
     throw new Error("Order not found");
   }
 
+  if (!stripe) {
+    res.status(500);
+    throw new Error("Stripe is not configured on the server");
+  }
+
+  const frontendUrl = process.env.FRONTEND_URL || req.headers.origin || "";
   const session = await stripe.checkout.sessions.create({
     ui_mode: "embedded",
     payment_method_types: ["card"],
@@ -94,7 +101,7 @@ export const payOrder = asyncHandler(async (req, res) => {
       },
       quantity: item.qty,
     })),
-    return_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    return_url: `${frontendUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
   });
 
   res.json({ clientSecret: session.client_secret });
