@@ -30,6 +30,8 @@ const sendEmail = async (options) => {
       tls: {
         rejectUnauthorized: false,
       },
+
+      connectionTimeout: 5000
     });
 
     const mailOptions = {
