@@ -95,19 +95,33 @@ export const payOrder = asyncHandler(async (req, res) => {
   });
 
   // 1. Send the email from here
-  const emailUrl = await sendEmail({
-    to: user.email,
-    subject: `Order Confirmation - ${order._id}`,
-    html: `
-      <h3>Hi ${user.name},</h3>
-      <p>Thank you for shopping with <strong>ShopVerse</strong>!</p>
-      <p>Your order <strong>#${order._id}</strong> has been received and is now being processed.</p>
-    `,
-  });
+  // ** START OF FIX **
 
-  // 2. Send back the clientSecret AND the test email URL
+  let emailUrl = null; // Default to null in case email fails
+
+  try {
+    // 1. Try to send the email
+    emailUrl = await sendEmail({
+      to: user.email,
+      subject: `Order Confirmation - ${order._id}`,
+      html: `
+        <h3>Hi ${user.name},</h3>
+        <p>Thank you for shopping with <strong>ShopVerse</strong>!</p>
+        <p>Your order <strong>#${order._id}</strong> has been received and is now being processed.</p>
+      `,
+    });
+  } catch (emailError) {
+    // 2. If email fails (like on Render), just log it and continue.
+    //    DO NOT throw the error.
+    console.error("Ethereal email failed (this is expected on Render):", emailError.message);
+  }
+
+  // 3. Send back the clientSecret. The payment will now work.
+  //    emailUrl will be the link on localhost, or null on Render.
   res.json({
     clientSecret: session.client_secret,
-    emailUrl: emailUrl, // Add this line
+    emailUrl: emailUrl, 
   });
+
+  // ** END OF FIX **
 });
