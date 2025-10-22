@@ -10,8 +10,8 @@ import User from "../models/userModel.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Creating a new order
+// Creating a new order
 export const addOrderItems = asyncHandler(async (req, res) => {
-
   const {
     orderItems,
     shippingAddress,
@@ -29,7 +29,7 @@ export const addOrderItems = asyncHandler(async (req, res) => {
 
   const order = new Order({
     user: req.user._id,
-    orderItems,
+    orderItems: orderItems.map(item => ({ ...item, product: item.product })), // Ensure product ID is linked
     shippingAddress,
     paymentMethod,
     itemsPrice,
@@ -40,21 +40,21 @@ export const addOrderItems = asyncHandler(async (req, res) => {
 
   const createdOrder = await order.save();
   const user = await User.findById(req.user._id);
-await sendEmail({
-  to: user.email,
-  subject: `Order Confirmation - ${order._id}`,
-  html: `
-    <h3>Hi ${user.name},</h3>
-    <p>Thank you for shopping with <strong>ShopVerse</strong>!</p>
-    <p>Your order <strong>#${order._id}</strong> has been received and is now being processed.</p>
-    <p><strong>Total:</strong> $${order.totalPrice}</p>
-    <p>We’ll notify you when it ships 🚚</p>
-  `,
-});
 
-  res.status(201).json(createdOrder);
-});
+  // Send email (this part is good)
+  await sendEmail({
+    to: user.email,
+    subject: `Order Confirmation - ${order._id}`,
+    html: `
+      <h3>Hi ${user.name},</h3>
+      <p>Thank you for shopping with <strong>ShopVerse</strong>!</p>
+      <p>Your order <strong>#${order._id}</strong> has been received and is now being processed.</p>
+    `,
+  });
 
+  // IMPORTANT: Send back the full createdOrder object
+  res.status(201).json(createdOrder); 
+});
 // Get logged-in user's orders
 export const getMyOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({ user: req.user._id });
@@ -75,6 +75,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
 
 // Update order to paid
 // payOrder controller
+// Update order to paid
 export const payOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
@@ -82,10 +83,13 @@ export const payOrder = asyncHandler(async (req, res) => {
     throw new Error("Order not found");
   }
 
+  // Find the user for their email
+  const user = await User.findById(order.user);
+
   const session = await stripe.checkout.sessions.create({
-    ui_mode: "embedded",
     payment_method_types: ["card"],
     mode: "payment",
+    ui_mode: "embedded", // KEY CHANGE 1: Enable embedded mode
     line_items: order.orderItems.map((item) => ({
       price_data: {
         currency: "usd",
@@ -94,8 +98,15 @@ export const payOrder = asyncHandler(async (req, res) => {
       },
       quantity: item.qty,
     })),
-    return_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    customer_email: user.email, // Good to pre-fill email
+    metadata: {
+      orderId: order._id.toString(),
+    },
+    // KEY CHANGE 2: 'return_url' is required for embedded mode
+    return_url: `${process.env.FRONTEND_URL}/order/${order._id}?success=true`,
+    // You can remove the 'cancel_url' as the user won't leave the page
   });
 
+  // KEY CHANGE 3: Send back the client_secret from the session
   res.json({ clientSecret: session.client_secret });
 });

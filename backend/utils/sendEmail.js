@@ -7,6 +7,9 @@ const sendEmail = async (options) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 
   const mailOptions = {
@@ -23,11 +26,11 @@ const sendEmail = async (options) => {
     console.log("📤 Email sent:", info.response);
   } catch (error) {
     console.error("❌ Email error:", error);
-    throw new Error(error.message); 
+    throw new Error(error.message); // This correctly stops the process if email fails
   }
   
-  
-  await transporter.sendMail(mailOptions);
+  // DELETE THE EXTRA CALL THAT WAS HERE
+  // await transporter.sendMail(mailOptions); 
 };
 
 export default sendEmail;
