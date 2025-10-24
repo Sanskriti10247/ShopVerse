@@ -37,6 +37,9 @@ The backend integrates **Socket.IO**, **Stripe**, and **Ethereal Email** to prov
 | 🧾 **Order Tracking** | Fetch user-specific order history dynamically. |
 
 ---
+## DEPLOYED LINK: shopverse-frontend-eta.vercel.app
+
+
 ## PREVIOUS UI:
 ![PHOTO-2025-10-21-17-22-57](https://github.com/user-attachments/assets/461290ca-8281-47e6-adbd-25556b179580)
 
