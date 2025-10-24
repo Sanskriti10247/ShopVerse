@@ -98,15 +98,19 @@ SHOPVERSE/
 │   │
 │   ├── src/
 │   │   ├── assets/
-│   │   │   └── react.svg
+│   │   │   ├── react.svg
+│   │   │   ├── Facetime.jpeg
+│   │   │   └── Google_Meet-Logo.wine.svg
 │   │   │
 │   │   ├── components/
+│   │   │   ├── Footer.jsx
 │   │   │   ├── Navbar.jsx
 │   │   │   └── PrivateRoute.jsx
 │   │   │
 │   │   ├── pages/
 │   │   │   ├── CancelPage.jsx
 │   │   │   ├── CartPage.jsx
+│   │   │   ├── ContactPage.jsx
 │   │   │   ├── HomePage.jsx
 │   │   │   ├── LoginPage.jsx
 │   │   │   ├── MyOrdersPage.jsx
